@@ -18,11 +18,12 @@ jobs:
     
     - name: Install Poetry
       uses: pip install poetry
-    
+
+
     - name: Build and publish
         env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           poetry install
+          poetry config pypi-token.pypi $PYPI_API_TOKEN
           poetry publish --build
-          
