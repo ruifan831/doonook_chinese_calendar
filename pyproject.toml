@@ -1,6 +1,6 @@
 [project]
 name = "doonook-chinese-calendar"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Chinese calendar and astrology API with lunar calendar conversion"
 authors = [
     {name = "Rex Xu",email = "doonookltd@gmail.com"}
@@ -11,10 +11,17 @@ dependencies = [
     "fastapi (>=0.115.8,<0.116.0)",
     "sqlalchemy (>=2.0.38,<3.0.0)",
     "pydantic-settings (>=2.8.0,<3.0.0)",
-    "sxtwl (>=2.0.7,<3.0.0)"
+    "sxtwl (>=2.0.7,<3.0.0)",
+    "alembic (>=1.14.1,<2.0.0)",
+    "psycopg2-binary (>=2.9.10,<3.0.0)",
+    "pydantic (>=2.10.6,<3.0.0)",
+    "click (>=8.1.7,<9.0.0)"
 ]
 license = {text = "MIT"}
 urls = {Homepage = "https://github.com/ruifan831/doonook_chinese_calendar"}
+
+[project.scripts]
+doonook-calendar = "doonook_chinese_calendar.cli:cli"
 
 [tool.poetry]
 packages = [{include = "doonook_chinese_calendar", from = "src"}]

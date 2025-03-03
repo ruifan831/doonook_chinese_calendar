@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean, Column, Integer, String, Date, JSON
-from ..database import Base
+from ..core.database import Base
 
 
 class DailyCalendar(Base):
