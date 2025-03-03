@@ -9,6 +9,8 @@ from ..core.config import settings
 from ..schemas.astro import AstroFortuneSchema
 import traceback
 
+logger = logging.getLogger(__name__)
+
 
 class AstroService:
     def __init__(self):
@@ -45,11 +47,11 @@ class AstroService:
             db_fortune = db.execute(select_query).scalar()
             
             if db_fortune:
-                logging.info(f"Found fortune in database for astroid {astroid} on {today}")
+                logger.debug(f"Found fortune in database for astroid {astroid} on {today}")
                 return AstroFortuneSchema.model_validate(db_fortune)
             
             # Fetch from API if not in database
-            logging.info(f"Fetching fortune from API for astroid {astroid}")
+            logger.debug(f"Fetching fortune from API for astroid {astroid}")
             api_data = await self._fetch_api_data(astroid, today)
             
             if api_data:
@@ -58,7 +60,8 @@ class AstroService:
                 api_data["date"] = today  # Add the date field
                 
                 # Log the data before validation
-                logging.info(f"API data before schema validation: {api_data}")
+                logger.debug(f"API data before schema validation: {api_data}")
+                logger.debug(f"API data type: {api_data}")
                 
                 # Create database record
                 await self.create_fortune(astroid, api_data, db)
@@ -85,14 +88,7 @@ class AstroService:
         """Create a new fortune for an astrology sign"""
         try:
             fortune = AstroFortune(
-                astroid=str(astroid),
-                astroname=self.astro.get(str(astroid), "Unknown"),
-                date=date.today(),
-                year=fortune_data.get("year", {}),
-                month=fortune_data.get("month", {}),
-                week=fortune_data.get("week", {}),
-                today=fortune_data.get("today", {}),
-                tomorrow=fortune_data.get("tomorrow", {})
+                **fortune_data
             )
             db.add(fortune)
             db.commit()
@@ -116,14 +112,13 @@ class AstroService:
                 }
                 response = await client.get(self.api_url, params=params)
                 data = response.json()
-                logging.info(f"API response: {data}")
                 
                 if data["status"] != 0:
                     raise ValueError(f"API Error: {data['msg']}")
                 
                 result = data["result"]
                 # Add astroname from our mapping
-                result["astroname"] = self.astro.get(str(astroid), "Unknown")
+                result["astroname"] = self.astro.get(astroid, "Unknown")
                 
                 return result
         except Exception as e:

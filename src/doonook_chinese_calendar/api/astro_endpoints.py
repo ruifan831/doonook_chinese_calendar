@@ -1,3 +1,4 @@
+import logging
 from ..schemas.astro import AstroFortuneSchema
 from ..core.database import get_db
 from fastapi import APIRouter, HTTPException, Depends
@@ -5,6 +6,9 @@ from sqlalchemy.orm import Session
 from datetime import date
 from ..services.astro_service import AstroService
 from typing import List
+
+# Set up logger
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 astro_service = AstroService()

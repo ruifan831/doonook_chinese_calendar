@@ -2,6 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from .config import CalendarSettings
+import logging
+
+logger = logging.getLogger(__name__)
 
 settings = CalendarSettings()
 
@@ -21,4 +24,4 @@ def get_db():
     try:
         yield db
     finally:
-        db.close() 
+        db.close()
