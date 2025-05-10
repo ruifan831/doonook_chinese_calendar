@@ -59,10 +59,6 @@ class AstroService:
                 api_data["astroid"] = astroid  # Ensure astroid is a string
                 api_data["date"] = today  # Add the date field
                 
-                # Log the data before validation
-                logger.debug(f"API data before schema validation: {api_data}")
-                logger.debug(f"API data type: {api_data}")
-                
                 # Create database record
                 await self.create_fortune(astroid, api_data, db)
                 

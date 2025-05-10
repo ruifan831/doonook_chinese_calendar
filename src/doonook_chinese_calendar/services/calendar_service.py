@@ -3,7 +3,7 @@ from sqlalchemy import select
 import sxtwl
 import httpx
 from sqlalchemy.orm import Session
-
+from chinese_calendar.utils import get_holidays,get_holiday_detail
 from ..schemas.calendar import DoonookDailyCalendarInfo, JiSuDailyCalendarInfo,DailyCalendarInfoSchema
 from ..core.config import settings
 from ..models.calendar import DailyCalendar
@@ -27,6 +27,15 @@ class ChineseCalendarService:
         self.rmc = ["初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
                     "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
                     "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"]
+        self.festival_mapping = {
+            "New Year's Day": "元旦",
+            "Spring Festival": "春节",
+            "Tomb-sweeping Day": "清明节",
+            "Labour Day": "劳动节",
+            "Dragon Boat Festival": "端午节",
+            "National Day": "国庆节",
+            "Mid-autumn Festival": "中秋节",
+        }
 
     async def get_daily_calendar(self, date: datetime, db: Session) -> DailyCalendarInfoSchema:
         try:
@@ -136,3 +145,21 @@ class ChineseCalendarService:
 
     def convert_to_lunar(self, date: datetime) -> dict:
         return self._calculate_calendar_info(date)
+    
+    def get_holidays(self, start_date: datetime, end_date: datetime) -> list:
+        return self._get_holidays(start_date, end_date)
+    
+    def _get_holidays(self, start_date: datetime, end_date: datetime) -> list:
+        holidays = get_holidays(start_date, end_date, True)
+        holiday_details = [(holiday,get_holiday_detail(holiday)[1]) for holiday in holidays]
+        holiday_list = [
+            {
+                "date": holiday[0],
+                "name": self._get_holiday_name(holiday[1]),
+            }
+            for holiday in holiday_details
+        ]
+        return holiday_list
+    
+    def _get_holiday_name(self, holiday: str) -> str:
+        return self.festival_mapping.get(holiday, '')

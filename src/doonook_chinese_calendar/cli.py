@@ -2,8 +2,6 @@ import click
 from alembic import command
 from alembic.config import Config
 from pathlib import Path
-import os
-import importlib.resources
 from .core.config import settings
 
 @click.group()

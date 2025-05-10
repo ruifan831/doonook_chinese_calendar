@@ -15,7 +15,8 @@ dependencies = [
     "alembic (>=1.14.1,<2.0.0)",
     "psycopg2-binary (>=2.9.10,<3.0.0)",
     "pydantic (>=2.10.6,<3.0.0)",
-    "click (>=8.1.7,<9.0.0)"
+    "click (>=8.1.7,<9.0.0)",
+    "chinesecalendar (>=1.10.0)"
 ]
 license = {text = "MIT"}
 urls = {Homepage = "https://github.com/ruifan831/doonook_chinese_calendar"}
