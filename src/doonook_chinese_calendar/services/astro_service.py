@@ -54,6 +54,7 @@ class AstroService:
             # Fetch from API if not in database
             logger.debug(f"Fetching fortune from API for astroid {astroid}")
             api_data: JiSuFortuneSchema = await self._fetch_api_data(astroid, today)
+            logger.debug(f"API data: {api_data}")
             
             if api_data:
                 # Add required fields before creating the schema
@@ -142,6 +143,7 @@ class AstroService:
 
 
     async def get_fortune_by_type(self, astroid: int, period: str):
+        logger.debug(f"Getting fortune by type {period} for astroid {astroid}")
         async with httpx.AsyncClient() as client:
             apiUrl = 'http://web.juhe.cn/constellation/getAll'
             requestParams = {
