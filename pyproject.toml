@@ -1,6 +1,6 @@
 [project]
 name = "doonook-chinese-calendar"
-version = "0.1.1"
+version = "0.1.2"
 description = "A Chinese calendar and astrology API with lunar calendar conversion"
 authors = [
     {name = "Rex Xu",email = "doonookltd@gmail.com"}

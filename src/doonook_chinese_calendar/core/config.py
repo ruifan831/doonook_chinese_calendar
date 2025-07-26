@@ -4,6 +4,7 @@ class CalendarSettings(BaseSettings):
     TIMEZONE: str = "Asia/Shanghai"
     LANGUAGE: str = "zh_CN"
     JISU_API_KEY: str
+    JUHE_API_KEY: str
     
     # Database settings
     POSTGRES_USER: str

@@ -43,27 +43,22 @@ class ChineseCalendarService:
             select_query = select(DailyCalendar).where(DailyCalendar.date == date.date())
             db_calendar = db.execute(select_query).scalar_one_or_none()
             if db_calendar:
-                logging.info(f"Found calendar in database for date: {date}")
                 return self._format_calendar_response(db_calendar)
 
             # Calculate basic calendar info
-            logging.info(f"Calculating calendar info for date: {date}")
             base_info = self._calculate_calendar_info(date)
             
             # Fetch additional info from API
-            logging.info(f"Fetching API data for date: {date}")
             api_info = await self._fetch_api_data(date)
             
             # Combine and save to database
             combined_info = DailyCalendarInfoSchema(**base_info.model_dump(),**api_info.model_dump())
-            logging.info(f"Combined calendar info for date: {date}")
             self._save_to_database(db,combined_info)
             
             return combined_info
             
         except Exception as e:
             error_msg = f"Error getting daily calendar for date: {date}"
-            logging.error(error_msg)
             logging.error(traceback.format_exc())
             raise ValueError(error_msg) from e
 
@@ -78,7 +73,6 @@ class ChineseCalendarService:
             }
             response = await client.get(self.api_url, params=params)
             data = response.json()
-            logging.info(f"API response: {data}")
             
             if data["status"] != 0:
                 raise ValueError(f"API Error: {data['msg']}")
@@ -103,7 +97,6 @@ class ChineseCalendarService:
             
             # Get solar terms
             jq = day.getJieQi()
-            logging.info(f"Jie Qi: {jq}")
             solar_term = self.jqmc[jq] if jq <= 24 and jq >= 0 else None
             
             # Get heavenly stems and earthly branches for year, month, day
