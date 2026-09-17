@@ -13,7 +13,7 @@ from doonook_chinese_calendar.core.config import settings
 from doonook_chinese_calendar.core.database import Base
 
 
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

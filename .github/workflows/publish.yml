@@ -1,8 +1,9 @@
 name: Publish Python Package
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:  # Allow manual triggering
 
 jobs:
@@ -15,14 +16,29 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
+
+    - name: Check release tag matches package version
+      if: startsWith(github.ref, 'refs/tags/')
+      env:
+        RELEASE_TAG: ${{ github.ref_name }}
+      run: |
+        python - <<'PY'
+        import os
+        import tomllib
+        from pathlib import Path
+        version = tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"]
+        assert os.environ["RELEASE_TAG"] == f"v{version}", "Tag and package version differ"
+        PY
     
     - name: Install Poetry
       run: pip install poetry
 
-    - name: Build and publish
-      env:
-        PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+    - name: Build and verify distributions
       run: |
-        poetry install
-        poetry config pypi-token.pypi $PYPI_API_TOKEN
-        poetry publish --build
+        poetry build
+        python scripts/check_distribution.py
+
+    - name: Publish verified distributions
+      env:
+        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
+      run: poetry publish

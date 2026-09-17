@@ -1,5 +1,5 @@
 from ..schemas.calendar import DailyCalendarInfoSchema
-from ..core.database import get_db
+from ..core.database import get_db_writer
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -9,19 +9,24 @@ from typing import Optional
 router = APIRouter()
 calendar_service = ChineseCalendarService()
 
-@router.get("/daily",response_model=DailyCalendarInfoSchema)
-async def get_daily_calendar(date: Optional[str] = None, db: Session = Depends(get_db)):
+
+@router.get("/daily", response_model=DailyCalendarInfoSchema)
+async def get_daily_calendar(
+    date: Optional[str] = None, db: Session = Depends(get_db_writer)
+):
+    """GET can populate the daily calendar cache, so it must use the writer."""
     try:
         if date:
             query_date = datetime.strptime(date, "%Y-%m-%d")
         else:
             query_date = datetime.now()
-            
-        return await calendar_service.get_daily_calendar(query_date,db)
+
+        return await calendar_service.get_daily_calendar(query_date, db)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/convert-to-lunar")
 async def convert_to_lunar(date: Optional[str] = None):
@@ -30,20 +35,20 @@ async def convert_to_lunar(date: Optional[str] = None):
             query_date = datetime.strptime(date, "%Y-%m-%d")
         else:
             query_date = datetime.now()
-            
+
         return calendar_service.convert_to_lunar(query_date)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/get-holidays")
 async def get_holidays(start_date: str, end_date: str):
     try:
         start_date = datetime.strptime(start_date, "%Y-%m-%d")
         end_date = datetime.strptime(end_date, "%Y-%m-%d")
-            
-            
+
         return calendar_service.get_holidays(start_date, end_date)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")

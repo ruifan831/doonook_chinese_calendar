@@ -1,0 +1,153 @@
+{
+  "rule_version": "solar-whole-sign-v1",
+  "ephemeris": "JPL SPK",
+  "ephemeris_sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2",
+  "zodiac": "tropical",
+  "frame": "geocentric apparent; true ecliptic/equinox of date",
+  "scope": "generic Sun-sign; not a natal chart",
+  "astroid": 1,
+  "start": "2026-09-17",
+  "end": "2026-09-17",
+  "sampling": "daily 12:00 Asia/Shanghai; snapshots, not exact aspect events",
+  "sample_count": 1,
+  "categories": {
+    "love": {
+      "score": 3,
+      "raw_score": 3.0,
+      "factors": []
+    },
+    "career": {
+      "score": 3,
+      "raw_score": 3.2008,
+      "factors": [
+        {
+          "id": "aspect:mercury:saturn:opposition",
+          "kind": "aspect",
+          "label": "水星与土星呈冲相",
+          "orb_degrees": 2.0453,
+          "observed_days": 1,
+          "sample_date": "2026-09-17",
+          "mean_contribution": -0.7443
+        },
+        {
+          "id": "aspect:sun:mars:sextile",
+          "kind": "aspect",
+          "label": "太阳与火星呈六合",
+          "orb_degrees": 0.8524,
+          "observed_days": 1,
+          "sample_date": "2026-09-17",
+          "mean_contribution": 0.4721
+        },
+        {
+          "id": "aspect:jupiter:saturn:trine",
+          "kind": "aspect",
+          "label": "木星与土星呈拱相",
+          "orb_degrees": 4.3621,
+          "observed_days": 1,
+          "sample_date": "2026-09-17",
+          "mean_contribution": 0.273
+        },
+        {
+          "id": "house:sun:6",
+          "kind": "solar_house",
+          "label": "太阳位于处女座，太阳整宫第6宫",
+          "observed_days": 1,
+          "sample_date": "2026-09-17",
+          "mean_contribution": 0.2
+        }
+      ]
+    },
+    "money": {
+      "score": 3,
+      "raw_score": 2.8786,
+      "factors": [
+        {
+          "id": "aspect:mercury:saturn:opposition",
+          "kind": "aspect",
+          "label": "水星与土星呈冲相",
+          "orb_degrees": 2.0453,
+          "observed_days": 1,
+          "sample_date": "2026-09-17",
+          "mean_contribution": -0.7443
+        },
+        {
+          "id": "house:venus:8",
+          "kind": "solar_house",
+          "label": "金星位于天蝎座，太阳整宫第8宫",
+          "observed_days": 1,
+          "sample_date": "2026-09-17",
+          "mean_contribution": 0.35
+        },
+        {
+          "id": "aspect:jupiter:saturn:trine",
+          "kind": "aspect",
+          "label": "木星与土星呈拱相",
+          "orb_degrees": 4.3621,
+          "observed_days": 1,
+          "sample_date": "2026-09-17",
+          "mean_contribution": 0.273
+        }
+      ]
+    },
+    "health": {
+      "score": 4,
+      "raw_score": 3.6721,
+      "factors": [
+        {
+          "id": "aspect:sun:mars:sextile",
+          "kind": "aspect",
+          "label": "太阳与火星呈六合",
+          "orb_degrees": 0.8524,
+          "observed_days": 1,
+          "sample_date": "2026-09-17",
+          "mean_contribution": 0.4721
+        },
+        {
+          "id": "house:sun:6",
+          "kind": "solar_house",
+          "label": "太阳位于处女座，太阳整宫第6宫",
+          "observed_days": 1,
+          "sample_date": "2026-09-17",
+          "mean_contribution": 0.2
+        }
+      ]
+    }
+  },
+  "positions": {
+    "sun": {
+      "longitude": 174.29839,
+      "sign": "处女座",
+      "solar_house": 6
+    },
+    "moon": {
+      "longitude": 245.696219,
+      "sign": "射手座",
+      "solar_house": 9
+    },
+    "mercury": {
+      "longitude": 190.584096,
+      "sign": "天秤座",
+      "solar_house": 7
+    },
+    "venus": {
+      "longitude": 214.015511,
+      "sign": "天蝎座",
+      "solar_house": 8
+    },
+    "mars": {
+      "longitude": 113.446006,
+      "sign": "巨蟹座",
+      "solar_house": 4
+    },
+    "jupiter": {
+      "longitude": 136.991543,
+      "sign": "狮子座",
+      "solar_house": 5
+    },
+    "saturn": {
+      "longitude": 12.629437,
+      "sign": "白羊座",
+      "solar_house": 1
+    }
+  }
+}
