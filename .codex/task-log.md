@@ -1,5 +1,19 @@
 # Task Log
 
+## 2026-09-17 — 0.1.4 已提交、推送并发布 PyPI
+
+- 发布代码提交63fe17e推送origin/main，版本标签v0.1.4指向同一提交。
+  GitHub Actions [35184523671](https://github.com/ruifan831/doonook_chinese_calendar/actions/runs/35184523671)
+  的版本校验、构建、分发检查及上传全部success。
+- [PyPI 0.1.4](https://pypi.org/project/doonook-chinese-calendar/0.1.4/)已返回正式wheel和sdist。
+  下载两产物，核对PyPI公开SHA256、内置DE440s摘要、NOTICE及无私有dotenv全部通过。
+- 实际PyPI wheel安装到独立临时目录，确认导入路径来自下载产物；配置虚拟PG参数、禁用网络、
+  清空星历覆盖后完成五期计算（含全年365样本），不读取业务.env或连接数据库。
+  首次验收脚本漏填包必需的POSTGRES_USER/PASSWORD，补齐测试值后通过，无发布代码修改。
+  业务依赖复用已验证venv；不把本次结果描述为全新ARM环境的完整依赖安装验证。
+- 发布前64项测试通过；提交内容扫描无私有密钥，.env/.env.local/dist/.DS_Store未提交。
+  更新context记录发布完成；doonook_temp的0.1.3固定依赖、服务器部署及Worker仍待后续接入。
+
 ## 2026-09-17 — 提交并发布 0.1.4（发布准备）
 
 - 用户明确授权提交并发布PyPI。核对main与origin/main一致，PyPI当前0.1.3、无0.1.4。

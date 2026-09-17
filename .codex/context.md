@@ -1,6 +1,7 @@
 # 当前上下文
 
-更新：2026-09-17。独立仓库 `/Users/ruifanxu/Workspace/active/zr/doonook_chinese_calendar`，main，0.1.4发布进行中。
+更新：2026-09-17。独立仓库 `/Users/ruifanxu/Workspace/active/zr/doonook_chinese_calendar`，main。
+0.1.4已发布PyPI，代码提交63fe17e，标签v0.1.4；main后续文档提交记录验收结果。
 目录已由Workspace/web整体迁入zr；旧Git、本地配置与dist保留。
 
 - 目标：星座请求由用户的Cloudflare Worker转发本地服务器，本地调用Mac Qwen；中国为数据库primary。
@@ -22,11 +23,14 @@
 - 最新验证：64项全通过，含包内离线真星历、规则、提示、schema、审计入库、隔离PG并发/writer。
   真实HTTP新链路生成30.56s、缓存4.5ms，五列_basis核验通过；wheel已重建。
 - 部署尚未切换：主后端仍固定0.1.3；.56独立venv仍是较早0.1.4，无本轮writer/星历升级。
-  需要发布新版PyPI包后升级宿主依赖/pip安装（自动带星历和Skyfield依赖），配置本地replica到中国writer。
+  需要升级宿主依赖/pip安装0.1.4（自动带星历和Skyfield依赖），配置本地replica到中国writer。
   源码.env不会随wheel分发；不能复制Mac路径当服务器配置。Worker未发布、业务库未写入。
 - 分发验证：18项星历测试通过；wheel隔离安装后无外部路径/禁网计算通过，sdist重建数据完整。
-  发布workflow增加分发检查与版本标签校验；用户已授权提交/发布，准备推送v0.1.4。
-- 上线待办：发布PyPI、正式宿主升级/网络白名单、配置writer、安排warm-astro每日预生成。
+  发布workflow通过，PyPI实际wheel/sdist下载后校验SHA256、星历、NOTICE、无私有dotenv均通过。
+  PyPI wheel隔离安装后，使用测试配置并禁网完成全部五期星历计算；业务依赖复用验证venv。
+  [PyPI 0.1.4](https://pypi.org/project/doonook-chinese-calendar/0.1.4/)、
+  [发布流水线](https://github.com/ruifan831/doonook_chinese_calendar/actions/runs/35184523671)。
+- 上线待办：正式宿主升级/网络白名单、配置writer、安排warm-astro每日预生成。
   iOS20秒超时，生成30秒以上，当前还不能宣称App线上接入完成；独立黄历日期接口仍用Jisu。
 - 证据：[日志](task-log.md)、[说明](../README.md)、[今日依据样例](../docs/examples/astro-basis-2026-09-17.json)、
   [新文案样例](../docs/examples/qwen-fortune.json)。Mac服务记录在ops/docs/ops/qwen-lan-2026-09-17.md。
