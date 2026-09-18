@@ -15,6 +15,7 @@ for name, value in {
     "QWEN_MODEL": "qwen3.8-lan",
     "ASTRO_EPHEMERIS_PATH": "/nonexistent/test-ephemeris.bsp",
     "QWEN_TIMEOUT_SECONDS": "2",
+    "ASTRO_GENERATE_ON_REQUEST": "false",
     "TIMEZONE": "Asia/Shanghai",
 }.items():
     os.environ[name] = value

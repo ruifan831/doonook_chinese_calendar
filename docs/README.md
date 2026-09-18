@@ -8,3 +8,5 @@
 - [任务日志](../.codex/task-log.md)
 - [工作区文档](../../docs/README.md)
 - [公共 SOP](../../sop/README.md)
+
+- [预生成与查询解耦、后台进程部署](astro-prefetch.md)

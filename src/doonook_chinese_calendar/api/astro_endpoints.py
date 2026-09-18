@@ -23,14 +23,19 @@ async def get_daily_fortune(
     date: Date | None = None,
     db: Session = Depends(get_db_writer),
 ):
-    """GET may create a cached fortune: query, lock and save on the writer.
+    """GET reads pre-generated fortunes by default; opt-in generation uses writer.
 
     Uses the host's node-role/REMOTE_WRITER_HOST settings with a synchronous
     session. Replica nodes keep POSTGRES_HOST pointing to their local standby.
     """
     target = date or datetime.now(ZoneInfo(settings.TIMEZONE)).date()
     try:
-        return await astro_service.get_daily_fortune(astroid, target, db)
+        return await astro_service.get_daily_fortune(
+            astroid,
+            target,
+            db,
+            allow_generation=settings.ASTRO_GENERATE_ON_REQUEST,
+        )
     except FortuneGenerationError as exc:
         raise HTTPException(
             503, detail=str(exc), headers={"Retry-After": "10"}

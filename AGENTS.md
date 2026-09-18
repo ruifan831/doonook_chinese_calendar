@@ -15,6 +15,7 @@
 
 - `src/doonook_chinese_calendar/api/`：FastAPI 路由，保持 Android/iOS 现有响应契约。
 - `services/astro_service.py`：数据库缓存与本地 Qwen 生成。
+- `services/astro_prefetch.py`：顺序多日预生成与常驻补缺；HTTP默认只读缓存，部署见docs/astro-prefetch.md。
 - `services/qwen_fortune.py`：Qwen 调用与 JSON 校验。
 - `data/de440s.bsp` 与 `data/NOTICE.txt`：随PyPI包分发的原始星历与来源说明；发布前运行 scripts/check_distribution.py。
 - `services/astro_basis.py`：离线星历与明确的占星编辑规则；依据见 docs/astro-generation.md，分数不是科学预测。

@@ -31,7 +31,12 @@ class AstroService:
         }
 
     async def get_daily_fortune(
-        self, astroid: int, date_param: date, db: Session
+        self,
+        astroid: int,
+        date_param: date,
+        db: Session,
+        *,
+        allow_generation: bool = True,
     ) -> AstroFortuneSchema:
         """Reuse persisted fortunes; generate only on a cache miss.
 
@@ -50,6 +55,9 @@ class AstroService:
             cached = db.execute(query).scalar_one_or_none()
             if cached:
                 return AstroFortuneSchema.model_validate(cached)
+
+            if not allow_generation:
+                raise FortuneGenerationError("该日期的星座运势尚未准备好，请稍后再试")
 
             if db.get_bind().dialect.name == "postgresql":
                 lock_key = date_param.toordinal() * 16 + astroid

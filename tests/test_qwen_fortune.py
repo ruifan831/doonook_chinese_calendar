@@ -364,6 +364,7 @@ def test_route_validation_503_and_timezone(monkeypatch, db):
 
 
 def test_http_response_keeps_client_contract(monkeypatch, db, generated):
+    monkeypatch.setattr(astro_endpoints.settings, "ASTRO_GENERATE_ON_REQUEST", True)
     app = FastAPI()
     app.include_router(astro_endpoints.router, prefix="/calendar")
     app.dependency_overrides[get_db] = lambda: db
@@ -499,3 +500,50 @@ def test_protocol_parser_does_not_accept_arbitrary_json_fragments(generated, cas
         content = valid + "</think></think>" + valid
     with pytest.raises(ValueError):
         qwen_fortune.parse_generated_fortune(content)
+
+
+def test_cache_only_http_never_calls_model_on_miss(monkeypatch, db):
+    app = FastAPI()
+    app.include_router(astro_endpoints.router, prefix="/calendar")
+    app.dependency_overrides[get_db] = lambda: db
+    fake = AsyncMock(side_effect=AssertionError("HTTP must not generate"))
+    monkeypatch.setattr(QwenFortuneGenerator, "generate", fake)
+    with TestClient(app) as client:
+        response = client.get("/calendar/astro/1?date=2026-09-17")
+    assert response.status_code == 503
+    assert "尚未准备好" in response.json()["detail"]
+    fake.assert_not_awaited()
+    assert not db.in_transaction()
+
+
+@pytest.mark.asyncio
+async def test_prefetch_makes_cache_only_http_work_without_model(
+    monkeypatch, db, generated
+):
+    from contextlib import nullcontext
+    from doonook_chinese_calendar.services.astro_prefetch import prefetch
+
+    fake = AsyncMock(
+        return_value=AstroFortuneSchema(
+            astroid=1, astroname="白羊座", date=date(2026, 9, 17), **generated
+        )
+    )
+    monkeypatch.setattr(QwenFortuneGenerator, "generate", fake)
+    result = await prefetch(
+        date(2026, 9, 17), 1, (1,), session_factory=lambda: nullcontext(db)
+    )
+    assert result.ready == 1 and not result.failed
+    fake.side_effect = AssertionError("cached query must not invoke model")
+    app = FastAPI()
+    app.include_router(astro_endpoints.router, prefix="/calendar")
+    app.dependency_overrides[get_db] = lambda: db
+    with TestClient(app) as client:
+        response = client.get("/calendar/astro/1?date=2026-09-17")
+    assert response.status_code == 200
+    assert response.json()["astroid"] == 1
+    assert response.json()["today"]["presummary"] == generated["today"]["presummary"]
+    result = await prefetch(
+        date(2026, 9, 17), 1, (1,), session_factory=lambda: nullcontext(db)
+    )
+    assert result.ready == 1
+    assert fake.await_count == 1

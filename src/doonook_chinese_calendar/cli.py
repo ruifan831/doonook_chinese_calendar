@@ -48,29 +48,59 @@ def migrate(revision, db_url):
     multiple=True,
     help="星座编号，可重复；默认全部12个",
 )
-def warm_astro(target_date, sign):
-    """顺序生成并缓存运势；已存在的日期/星座不覆盖。"""
+@click.option(
+    "--days",
+    type=click.IntRange(1, 31),
+    default=1,
+    show_default=True,
+    help="从目标日期开始连续预生成的天数，包含当天",
+)
+def warm_astro(target_date, sign, days):
+    """顺序补齐缓存；单条失败继续处理，已有记录不覆盖。"""
     import asyncio
     from datetime import datetime
     from zoneinfo import ZoneInfo
-    from .core.database import WriterSessionLocal
-    from .services.astro_service import AstroService
+    from .services.astro_prefetch import prefetch
 
     target = (target_date or datetime.now(ZoneInfo(settings.TIMEZONE))).date()
-
-    async def run():
-        service = AstroService()
-        for astroid in sign or range(1, 13):
-            with WriterSessionLocal() as db:
-                await service.get_daily_fortune(astroid, target, db)
-            click.echo(f"ready: {target} sign={astroid}")
-
     try:
-        asyncio.run(run())
+        result = asyncio.run(
+            prefetch(target, days, tuple(sign or range(1, 13)), report=click.echo)
+        )
     except Exception:
         raise click.ClickException(
             "运势预生成失败；已完成记录保留，可稍后重试"
         ) from None
+    if result.failed:
+        raise click.ClickException(
+            f"{len(result.failed)} 条未完成；已完成记录保留，重跑自动补缺"
+        )
+
+
+@cli.command("maintain-astro")
+@click.option(
+    "--days",
+    type=click.IntRange(1, 31),
+    default=7,
+    show_default=True,
+    help="滚动预生成天数，包含当天",
+)
+@click.option(
+    "--interval",
+    type=click.IntRange(60, 86400),
+    default=3600,
+    show_default=True,
+    help="每轮结束后等待秒数；失败记录在下一轮补齐",
+)
+def maintain_astro(days, interval):
+    """持续维护未来缓存，交由 systemd/容器监管；只启动一个实例。"""
+    import asyncio
+    from .services.astro_prefetch import maintain
+
+    try:
+        asyncio.run(maintain(days, interval, report=click.echo))
+    except KeyboardInterrupt:
+        click.echo("预生成已停止；已完成记录保留")
 
 
 if __name__ == "__main__":

@@ -1,8 +1,27 @@
 # 当前上下文
 
-更新：2026-09-17。独立仓库 `/Users/ruifanxu/Workspace/active/zr/doonook_chinese_calendar`，main。
+更新：2026-09-18。独立仓库 `/Users/ruifanxu/Workspace/active/zr/doonook_chinese_calendar`，main。
 0.1.4已发布PyPI，代码提交63fe17e，标签v0.1.4；main后续文档提交记录验收结果。
 目录已由Workspace/web整体迁入zr；旧Git、本地配置与dist保留。
+
+
+## 当前任务：0.1.5 预生成（本地完成，未发布）
+
+- 9月18日增加详细文案提示：summary 100～150字、四维度各60～100字，短提示15～30字；
+  max_tokens=6500，仍每字段最多300字符；41项定向测试通过、1项PG测试跳过。
+  未实测新文案耗时/质量；已有dist早于此次提示修改，发布前必须重新构建。
+
+- 新增 warm-astro --days、maintain-astro --days 7 --interval 3600；先当天12星座再未来日期，
+  单条失败继续、下轮补缺，已有缓存不覆盖，复用原writer与事务锁。
+- HTTP默认 ASTRO_GENERATE_ON_REQUEST=false，仅查缓存；缺失立即503，不等待模型。
+  本机隔离模型演示 run_local.py 显式开启旧请求内生成；正式服务建议保持false。
+- 验证：71项pytest全通过，含临时独立PostgreSQL并发/主库路由；测试容器已清理。
+  wheel/sdist 0.1.5本地构建和分发检查通过，内置星历/NOTICE完整、无私有dotenv。
+- 未修改服务器配置或生产库，未提交/推送/发布；不能声称线上任务已启动。
+  主后端本地固定依赖已更新至0.1.5并增加独立Compose服务，仍需发布与部署。
+- 下一步：发布/安装0.1.5到实际生成环境，先warm-astro补齐，再监管启动maintain-astro，
+  API升级并保持只读缓存；部署路径/主库/模型连接需在实际节点核对。
+- 运维与验收：[预生成说明](../docs/astro-prefetch.md)。下面保留0.1.4已验证的模型与分发背景。
 
 - 目标：星座请求由用户的Cloudflare Worker转发本地服务器，本地调用Mac Qwen；中国为数据库primary。
 - 当前链路：本地JPL DE440s/Skyfield → 太阳星座占星编辑规则 → Qwen → JSON校验 → writer缓存。

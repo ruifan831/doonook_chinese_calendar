@@ -14,6 +14,8 @@ class CalendarSettings(BaseSettings):
     QWEN_LAN_API_KEY: SecretStr = SecretStr("")
     QWEN_MODEL: str = ""
     QWEN_TIMEOUT_SECONDS: float = Field(default=120, gt=0, le=600)
+    # HTTP requests must not wait for local model inference. CLI prefetch still generates.
+    ASTRO_GENERATE_ON_REQUEST: bool = False
     # Optional override; empty uses the ephemeris distributed inside the package.
     ASTRO_EPHEMERIS_PATH: str = ""
 

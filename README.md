@@ -8,13 +8,14 @@
 `AstroFortuneSchema`，没有新增 envelope；包含 today、tomorrow、week、month、year。
 已核对黄历通 Android/iOS 的字段模型。
 
-1. 查 `astro_fortunes` 中对应星座/日期的记录；有记录就直接返回，包括历史供应商记录。
-2. 缺失时在 PostgreSQL 获取该星座/日期的事务锁，再次检查缓存。
-3. 本地Skyfield/JPL星历计算七个天体位置、相位和太阳整宫，按版本化规则生成评分与因素，
-   再调用 `.env` 配置的本地 Qwen `/v1/chat/completions` 撰写文案。
-4. 校验完整 JSON、所有必填字段与字符串类型；日期、星座编号/名称由服务端填写。
-5. 校验成功后保存，后续请求复用。模型超时、截断或格式错误返回 503，不保存空数据，
-   不静默切换回第三方供应商。等待锁也有超时，取消和失败会释放事务。
+1. App 请求只读取 `astro_fortunes` 的星座/日期缓存，保留原响应格式和历史记录。
+2. 默认 `ASTRO_GENERATE_ON_REQUEST=false`，缺失立即返回 503 + Retry-After，不调用或等待模型。
+3. 独立预生成进程按“当天全部星座，再下一天”的顺序计算星历并调用 Qwen。
+4. 后台生成沿用 PostgreSQL 星座/日期事务锁、二次缓存检查和完整 JSON 校验；成功才入库。
+5. 单条失败不影响其他星座；下一轮重试缺失项，已生成记录不覆盖。
+
+仅调试或迁移时可显式设置 `ASTRO_GENERATE_ON_REQUEST=true` 恢复请求内生成；
+这会再次承担模型延迟，不建议在 App 的正式查询进程启用。
 
 模型收到与校验器一致的JSON Schema；当前MLX环境未启用约束解码，结构保证由服务端校验实现。
 完整字段映射与中/本地后端路由边界见[数据库契约](docs/qwen-data-contract.md)。
@@ -27,7 +28,7 @@
 ## 配置 Qwen
 
 星座运势已移除 Jisu / Juhe 调用和供应商切换，不再需要 `ASTRO_PROVIDER`。
-URL、API Key、模型名均无代码默认值；缺少任一配置时，未缓存请求返回 503，已有缓存仍可读取。
+URL、API Key、模型名均无代码默认值；预生成进程缺少任一配置时无法生成，已有缓存仍可读取。
 
 实际配置写入 **API / CLI 进程工作目录下的 `.env`**，模板见 [.env.example](.env.example)：
 
@@ -36,6 +37,7 @@ QWEN_BASE_URL=填写本地模型的Nginx地址并以/v1结尾
 QWEN_LAN_API_KEY=填写Nginx的Bearer密钥
 QWEN_MODEL=填写Ollama模型名称
 QWEN_TIMEOUT_SECONDS=120
+ASTRO_GENERATE_ON_REQUEST=false
 TIMEZONE=Asia/Shanghai
 ASTRO_EPHEMERIS_PATH=
 ```
@@ -90,34 +92,38 @@ REMOTE_WRITER_HOST=填写中国主库的WireGuard地址
 响应与表结构不变，无需客户端改动；依然需要在实际宿主安装更新后的 wheel 才能生效。
 共享公开星座内容不新增 App 专属业务配置或跨 App 数据。
 
-## 延迟与提前生成
+## 延迟与提前生成（0.1.5）
 
-实测一份完整五期运势首次约 30 秒，缓存查询约 6.6 毫秒。
-现有 iOS 请求超时为 20 秒；因此正式切换前需要提前生成当天数据，
-并在部署运行环境安排后续日期的预生成。缓存缺失路径可能超过现有客户端超时。
-本次没有自动安装定时任务，也没有修改客户端超时。
+已把 HTTP 查询和模型生成分开。详细配置、监管进程与上线顺序见
+[预生成运维](docs/astro-prefetch.md)。以下命令需安装包含本轮改动的 0.1.5，不能直接用于旧 0.1.4。
 
 ```bash
-doonook-calendar warm-astro --date 2026-09-17
-# 只生成指定星座；可重复传入 --sign
-doonook-calendar warm-astro --date 2026-09-18 --sign 1 --sign 2
+# 首次补齐：今天起连续7天，全部12星座，84条每日记录。
+doonook-calendar warm-astro --days 7
+# 常驻维护：每轮完成后等待一小时，按最新北京时间补齐未来7天。
+doonook-calendar maintain-astro --days 7 --interval 3600
+# 补指定日期/星座，单次命令支持 --date / 多个 --sign。
+doonook-calendar warm-astro --date 2026-09-17 --days 2 --sign 1 --sign 2
 ```
 
-不指定日期时，每次执行按 `TIMEZONE` 计算当天日期。12 个星座顺序处理，
-与单并发 Qwen 服务匹配；失败以非零退出码结束，已完成记录保留，重试会跳过缓存。
-历史缓存未清理；如需替换旧供应商内容，应另行制定有范围的刷新策略。
+每条记录含今日、明日、周、月、年五期内容；7天不是7次模型调用，而是最多84次。
+单条约30秒时首次一轮约42分钟，仅为估算。滚动窗口以后通常每天新增12条；
+已有内容直接读缓存。单条失败继续；warm-astro 有失败则非零退出，maintain-astro 下一轮补齐。
+当前/未来窗口之外的日期可通过 warm-astro 手动补齐，HTTP 不自动排队任意历史日期。
+常驻进程需由 systemd 或容器监管；本次代码修改不会自动安装服务器任务或发布包。
 
 ## 安装与宿主接入
 
-本包通过PyPI发布、pip安装：`pip install --upgrade doonook-chinese-calendar==0.1.4`。
+当前已发布版本为0.1.4；本轮0.1.5已在本地构建，尚未发布PyPI。
+预生成新功能需安装本轮wheel，或等待0.1.5发布后通过pip升级。
 Skyfield依赖由pip安装，JPL星历随wheel/sdist内置，无需单独部署星历或为它编译C程序。
 构建/发布时执行 `python scripts/check_distribution.py` 检查数据完整性与私有配置排除。
 
 源码：`pip install -e .`。本地构建的 wheel：
-`dist/doonook_chinese_calendar-0.1.4-py3-none-any.whl`。
+`dist/doonook_chinese_calendar-0.1.5-py3-none-any.whl`。
 
 `doonook_temp` 的运行依赖和 `Dockerfile.base` 仍固定 0.1.3。
-正式接入需在明确的部署目标中统一升级依赖、安装 0.1.4、
+正式接入本轮功能需在明确的部署目标中统一升级依赖、安装 0.1.5、
 重建基础镜像，注入上面的环境变量，预生成数据后验证现有 `/calendar/astro` 接口。
 发布流程由匹配包版本的 `v*` 标签触发，或从 GitHub Actions 手动执行；先检查分发包，再上传 PyPI。
 

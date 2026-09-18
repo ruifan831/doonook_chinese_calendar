@@ -50,7 +50,14 @@ Qwen 收到与代码校验器一致的 JSON Schema，并按提示返回 JSON 文
 | today / tomorrow | JSON | summary、money、career、love、health、presummary、star、color、number；服务端补date |
 
 日期不由模型决定；`number` 保持字符串，兼容现有客户端。每段模型文案必填、
-非空、最长300字符。API保持原始JSON模型，无新增envelope，客户端字段不变。
+非空、最长300字符。
+文案目标：summary 100～150个汉字，money/career/love/health各60～100个汉字，
+presummary 15～30个汉字；star/color/number保持简短。正文要求具体场景、可执行建议，
+用可能性表述而不虚构用户经历，各时期侧重点不同。这些目标字数由提示词引导，
+硬校验仍为每字段1～300字符，避免模型轻微偏离目标便导致整批失败。
+单次五期生成max_tokens提高到6500，超时仍沿用QWEN_TIMEOUT_SECONDS；
+生成时间可能增加，需在实际模型上核验耗时。已有数据库缓存不覆盖，仅新生成内容生效。
+API保持原始JSON模型，无新增envelope，客户端字段不变。
 修复了Qwen结果经旧JiSu schema转换时丢弃 `week.summary` 的问题。
 
 ## 验证方法

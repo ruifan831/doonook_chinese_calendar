@@ -44,6 +44,7 @@ def main():
     # Package import creates its normal engine but must never connect to a
     # business database. All routes below override its writer dependency.
     os.environ.update(
+        ASTRO_GENERATE_ON_REQUEST="true",  # Isolated model smoke testing only.
         POSTGRES_USER="unused",
         POSTGRES_PASSWORD="unused",
         POSTGRES_HOST="127.0.0.1",

@@ -121,7 +121,14 @@ class QwenFortuneGenerator:
             "这些是当地每日中午的采样，不是整期持续相位；不要把某天因素说成整月整年都有。"
             "不用向用户复述星体、相位、度数、宫位或分数，转成简短日常建议，不添加其他天象。"
             "star/color/number是兼容旧界面的娱乐装饰，不属于天文事实。"
-            "各时期内容应有区别。每个描述字段控制在15至30个汉字。"
+            "各时期内容应有区别：日运聚焦当天行动，周运关注安排与沟通，"
+            "月运关注阶段计划，年运关注长期习惯与方向。"
+            "summary写100至150个汉字，用3至5句话说明整体节奏、重点和行动建议。"
+            "money/career/love/health各写60至100个汉字，用2至4句话，"
+            "包含一个可能遇到的日常场景、一条具体可执行建议及需要留意的事项。"
+            "场景须用条件或可能性表达，不把用户经历当作已知事实。"
+            "避免空泛套话、重复凑字和不同维度复用同一段话；不要为了丰富内容编造天象。"
+            "presummary保持15至30个汉字的一句话提示；star/color/number只填简短值。"
             "只输出一个JSON对象，顶层必须有year、month、week、today、tomorrow。"
             "year/month/week各有summary、money、career、love、health五个非空字符串。"
             "today/tomorrow除了上述五个字段，还要有presummary（一句提示）、"
@@ -144,7 +151,7 @@ class QwenFortuneGenerator:
             "stream": False,
             "reasoning_effort": "none",
             "temperature": 0.3,
-            "max_tokens": 2400,
+            "max_tokens": 6500,
         }
         try:
             # This backend's MLX package lacks xgrammar: validate plain JSON here

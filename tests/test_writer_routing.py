@@ -46,6 +46,7 @@ def test_replica_without_writer_fails_without_disclosing_credentials(host):
     with pytest.raises(ValidationError) as exc:
         CalendarSettings(
             _env_file=None,
+            ASTRO_GENERATE_ON_REQUEST="true",
             DOONOOK_NODE_ROLE="replica",
             REMOTE_WRITER_HOST=host,
             POSTGRES_PASSWORD="private-test-password",
@@ -134,6 +135,7 @@ def test_replica_route_persists_on_primary_not_local_host(tmp_path):
     )
     environment = os.environ.copy()
     environment.update(
+        ASTRO_GENERATE_ON_REQUEST="true",
         DOONOOK_NODE_ROLE="replica",
         POSTGRES_HOST="192.0.2.1",
         REMOTE_WRITER_HOST=target.host,
@@ -193,6 +195,7 @@ def test_migration_default_uses_writer_with_encoded_password(monkeypatch):
     module = importlib.import_module("doonook_chinese_calendar.cli")
     config = CalendarSettings(
         _env_file=None,
+        ASTRO_GENERATE_ON_REQUEST="true",
         DOONOOK_NODE_ROLE="replica",
         REMOTE_WRITER_HOST="writer.invalid",
         POSTGRES_HOST="local.invalid",
