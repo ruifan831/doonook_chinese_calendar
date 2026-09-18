@@ -194,3 +194,9 @@
 - 用户授权先发布公共包到PyPI，再提交宿主服务器改动。范围包含滚动预生成、HTTP默认只读缓存、详细运势提示词及相关文档测试；不包含.DS_Store或私有配置。
 - 全套测试71项通过（独立临时PostgreSQL，完成后删除容器）；重新构建wheel/sdist并校验星历、NOTICE和无私有dotenv。未调用真实模型或写生产库。
 - 使用现有v*标签发布流水线；发布结果另行记录，未将待发布状态当作已上线。
+
+## 2026-09-18 — PyPI 0.1.5发布完成
+
+- 已推送2112947及v0.1.5，发布流水线 https://github.com/ruifan831/doonook_chinese_calendar/actions/runs/35303639833 成功。
+- PyPI正式wheel/sdist下载后SHA256一致，校验星历与NOTICE、无私有dotenv；wheel确认含预生成服务及6500 tokens详细提示。71项测试通过，独立测试数据库容器已删除。
+- 更新README、运维文档与当前摘要；未登录生产服务器、部署容器或写业务库。
